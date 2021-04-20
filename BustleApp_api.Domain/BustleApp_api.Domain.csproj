@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="UserProfileAggregate\" />
+    <Folder Include="UserProfileAggregate\Dtos\" />
+    <Folder Include="Utilities\" />
+    <Folder Include="Interfaces\" />
+    <Folder Include="SubscriptionAggregate\" />
+    <Folder Include="SubscriptionAggregate\Dtos\" />
+  </ItemGroup>
+</Project>
