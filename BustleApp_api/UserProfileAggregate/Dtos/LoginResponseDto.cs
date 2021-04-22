@@ -13,8 +13,8 @@ namespace BustleApp_api.Domain.UserProfileAggregate.Dtos
         public string ResponseText { get; set; }
         public string Url { get; set; }
         public string SubscriptionName { get; set; }
-        public DateTime? SubscriptionStartDate { get; set; }
-        public DateTime? SubscriptionEndDate { get; set; }
+        public string SubscriptionStartDate { get; set; }
+        public string SubscriptionEndDate { get; set; }
         public int SubscriptionExpiryDaysLeft { get; set; }
     }
 }

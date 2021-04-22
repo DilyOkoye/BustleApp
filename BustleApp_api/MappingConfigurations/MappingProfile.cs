@@ -15,7 +15,8 @@ namespace BustleApp_api.Repository.MappingConfigurations
                 cfg.CreateMap<UserProfileDto, UserProfile>();
                 cfg.CreateMap<UserProfile, UserProfileDto>();
                 cfg.CreateMap<List<UserProfile>, List<UserProfileDto>>();
-                
+                cfg.CreateMap<List<UserProfileDto>, List<UserProfile>>();
+
             });
 
             var mapper = new Mapper(config);

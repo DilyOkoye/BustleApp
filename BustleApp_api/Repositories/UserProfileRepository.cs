@@ -9,6 +9,7 @@ using BustleApp_api.Repository.DatabaseContext;
 using BustleApp_api.Repository.Implementations;
 using BustleApp_api.Repository.MappingConfigurations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace BustleApp_api.Repository.Repositories
@@ -16,6 +17,7 @@ namespace BustleApp_api.Repository.Repositories
     public class UserProfileRepository : GenericRepository<UserProfile>, IUserProfileRepository
     {
         private readonly IOptions<Configurations> config;
+        private readonly IConfiguration _config;
 
         public UserProfileRepository(BustleContext context, IOptions<Configurations> config) : base(context)
         {
@@ -99,28 +101,49 @@ namespace BustleApp_api.Repository.Repositories
 
         }
 
+
         public List<UserProfileDto> GetAllUsers(UserProfileDto input)
         {
-            var allUsers = _context.UserProfile.ToList().Skip((input.PagedResultDto.Page - 1) * input.PagedResultDto.SkipCount).Take(input.PagedResultDto.MaxResultCount);
+            
+            var allUsers = (from user in _context.UserProfile.ToList()
+                        
+                         select new UserProfileDto
+                         {
+                             UserName = user.UserName,
+                             Password = user.Password,
+                             EmailAddress = user.EmailAddress,
+                             Id = user.Id,
+                             DateCreated = user.DateCreated,
+                             LastName = user.LastName,
+                             FirstName = user.FirstName,
+                             MiddleName = user.MiddleName,
+                             
+                         }).ToList();
 
             // Map Records
             List<UserProfileDto> userDto = MappingProfile.MappingConfigurationSetups().Map<List<UserProfileDto>>(allUsers);
 
             //Apply Sort
-            userDto = Sort(input.PagedResultDto.Sort, input.PagedResultDto.SortOrder, userDto);
-
-            // Apply search
-            if (!string.IsNullOrEmpty(input.PagedResultDto.Search))
+            if(input.PagedResultDto != null)
             {
-                userDto = userDto.Where(p => p.UserName != null && p.UserName.ToLower().ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.EmailAddress != null && p.EmailAddress.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.FirstName != null && p.FirstName.ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.LastName != null && p.LastName.ToLower().ToString().Contains(input.PagedResultDto.Search.ToLower())
-                || p.MiddleName != null && p.MiddleName.ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.PhoneNumber != null && p.PhoneNumber.ToLower().ToString().Contains(input.PagedResultDto.Search.ToLower())
-                ).ToList();
+                userDto = Sort(input.PagedResultDto.Sort, input.PagedResultDto.SortOrder, userDto);
 
+                // Apply search
+                if (!string.IsNullOrEmpty(input.PagedResultDto.Search))
+                {
+                    userDto = userDto.Where(p => p.UserName != null && p.UserName.ToLower().ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.EmailAddress != null && p.EmailAddress.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.FirstName != null && p.FirstName.ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.LastName != null && p.LastName.ToLower().ToString().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.MiddleName != null && p.MiddleName.ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.PhoneNumber != null && p.PhoneNumber.ToLower().ToString().Contains(input.PagedResultDto.Search.ToLower())
+                    ).ToList();
+
+                }
             }
+            
+
+            
             return userDto;
 
         }
@@ -232,8 +255,8 @@ namespace BustleApp_api.Repository.Repositories
                 if (subscriptions != null)
                 {
                     returnProp.SubscriptionName = subscriptions.Name;
-                    returnProp.SubscriptionStartDate = subscriptions.StartDate;
-                    returnProp.SubscriptionEndDate = subscriptions.EndDate;
+                    returnProp.SubscriptionStartDate = subscriptions.StartDate.ToString("dddd, dd MMMM yyyy");
+                    returnProp.SubscriptionEndDate = subscriptions.EndDate.ToString("dddd, dd MMMM yyyy");
                     returnProp.SubscriptionExpiryDaysLeft = subscriptions.EndDate.Day - subscriptions.StartDate.Day;
                 }
 

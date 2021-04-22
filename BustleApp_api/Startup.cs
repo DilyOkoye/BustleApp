@@ -36,17 +36,15 @@ namespace BustleApp_api
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+
+        public string ConnectionString => Configuration.GetConnectionString("Default");
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<Configurations>(Configuration.GetSection("BustleConfigurations"));
+            services.AddDbContext<BustleContext>(opt => { opt.UseSqlServer(ConnectionString); });
 
-            services.AddDbContext<BustleContext>(
-    options =>
-        options.UseSqlServer(
-            Configuration.GetConnectionString("Default"),
-            x => x.MigrationsAssembly("BustleApp_api")));
-
+            services.AddAuthorization();
             services.AddRepository();
             services.AddControllers();
 
@@ -56,8 +54,8 @@ namespace BustleApp_api
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
-                    Title = "Bustle App API",
-                    Description = "API services for Bustle App",
+                    Title = "Bustle API",
+                    Description = "API services for Bustle APP",
                     TermsOfService = new Uri("https://aerglotechnology.com"),
                     Contact = new OpenApiContact
                     {
@@ -67,7 +65,7 @@ namespace BustleApp_api
                     },
                     License = new OpenApiLicense
                     {
-                        Name = "Use under Bustle App",
+                        Name = "Use under Bustle APP",
                         Url = new Uri("http://aerglotechnology.com/#contact"),
                     }
                 });

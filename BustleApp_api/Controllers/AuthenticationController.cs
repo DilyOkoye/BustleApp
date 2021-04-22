@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BustleApp_api.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
+   // [Route("api/[controller]")]
+   // [ApiController]
     public class AuthenticationController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
