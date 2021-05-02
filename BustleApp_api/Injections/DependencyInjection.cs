@@ -1,7 +1,10 @@
 ﻿using System;
+using BustleApp_api.CartAggregate;
 using BustleApp_api.Domain.Interfaces;
 using BustleApp_api.Domain.SubscriptionAggregate;
 using BustleApp_api.Domain.UserProfileAggregate;
+using BustleApp_api.InventoryAggregate;
+using BustleApp_api.Repositories;
 using BustleApp_api.Repository.Implementations;
 using BustleApp_api.Repository.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +17,8 @@ namespace BustleApp_api.Repository.Injections
         {
             services.AddTransient<IUserProfileRepository, UserProfileRepository>();
             services.AddTransient<ISubscriptionRepository, SubscriptionRepository>();
+            services.AddTransient<IInventoryRepository, InventoryRepository>();
+            services.AddTransient<ICartRepository, CartRepository>();
             services.AddTransient<IUnitOfWork, UnitOfWork>();
 
             // Auto Mapper Configurations

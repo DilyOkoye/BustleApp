@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BustleApp_api.CartAggregate.Dtos;
 using BustleApp_api.Domain.Interfaces;
 using BustleApp_api.Domain.UserProfileAggregate.Dtos;
+using BustleApp_api.InventoryAggregate.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -20,7 +22,7 @@ namespace BustleApp_api.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        //GET: /<controller>/
+        //GET: /<User Profile Controller>/
         [HttpGet]
         [Route("GetUsersView")]
         public async Task<UserProfileDto> GetUserForView(int Id)
@@ -64,6 +66,7 @@ namespace BustleApp_api.Controllers
         }
 
 
-      
+        
+
     }
 }

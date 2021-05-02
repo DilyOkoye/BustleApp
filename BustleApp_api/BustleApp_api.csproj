@@ -32,5 +32,9 @@
     <Folder Include="Injections\" />
     <Folder Include="MappingConfigurations\" />
     <Folder Include="Repositories\" />
+    <Folder Include="InventoryAggregate\" />
+    <Folder Include="InventoryAggregate\Dtos\" />
+    <Folder Include="CartAggregate\" />
+    <Folder Include="CartAggregate\Dtos\" />
   </ItemGroup>
 </Project>
