@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BustleApp_api.Migrations
 {
     [DbContext(typeof(BustleContext))]
-    [Migration("20210502235226_new tables")]
-    partial class newtables
+    [Migration("20210503000724_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
