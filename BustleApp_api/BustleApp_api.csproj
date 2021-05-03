@@ -4,7 +4,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 <PropertyGroup>               
-    <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
+    <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>               
+    <UserSecretsId>f5d7cc2a-4998-4e74-a9dc-3cb4b0839341</UserSecretsId>
 </PropertyGroup>
 
   <ItemGroup>
