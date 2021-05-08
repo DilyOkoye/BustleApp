@@ -20,12 +20,43 @@ namespace BustleApp_api.Repositories
 
         }
 
+        public InventoryDto GetInventoryDetails(int id)
+        {
+            try
+            {
+                var query = (from Inventory in _context.Inventory.ToList()
+
+                             select new InventoryDto
+                             {
+                                 Name = Inventory.Name,
+                                 Description = Inventory.Description,
+                                 Id = Inventory.Id,
+                                 CostPrice = Formatters.FormatAmount(Inventory.CostPrice),
+                                 SellingPrice = Formatters.FormatAmount(Inventory.SellingPrice),
+                                 Quantity = Inventory.Quantity,
+                                 DateCreated = Inventory.DateCreated,
+                                 Status = Inventory.Status,
+                                 UserId = Inventory.UserId
+
+                             }).ToList().FirstOrDefault();
+
+                return query;
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return null;
+        }
+
         public async Task<InventoryDto> GetInventoryForView(int Id)
         {
             var tags = await _context.Inventory.Where(x => x.Id == Id).FirstOrDefaultAsync();
             if (tags != null)
             {
-                return MappingProfile.MappingConfigurationSetups().Map<InventoryDto>(tags);
+                var records = GetInventoryDetails(Id);
+
+                return MappingProfile.MappingConfigurationSetups().Map<InventoryDto>(records);
             }
             return new InventoryDto();
         }
@@ -72,8 +103,10 @@ namespace BustleApp_api.Repositories
 
         protected virtual async Task Create(InventoryDto input)
         {
-            Inventory tagDto = MappingProfile.MappingConfigurationSetups().Map<Inventory>(input);
-            _context.Inventory.Add(tagDto);
+            Inventory inventory = MappingProfile.MappingConfigurationSetups().Map<Inventory>(input);
+            inventory.DateCreated = DateTime.Now;
+            inventory.Status = "Active";
+            _context.Inventory.Add(inventory);
             await _context.SaveChangesAsync();
 
         }
@@ -94,7 +127,7 @@ namespace BustleApp_api.Repositories
         {
 
             var query = (from Inventory in _context.Inventory.ToList()
-                         
+
                          select new InventoryDto
                          {
                              Name = Inventory.Name,
@@ -107,27 +140,30 @@ namespace BustleApp_api.Repositories
                              Status = Inventory.Status,
                              UserId = Inventory.UserId
 
-                         }).ToList().Skip((input.PagedResultDto.Page - 1) * input.PagedResultDto.SkipCount).Take(input.PagedResultDto.MaxResultCount);
+                         }).ToList();
 
             // Map Records
             List<InventoryDto> invDto = MappingProfile.MappingConfigurationSetups().Map<List<InventoryDto>>(query);
 
-            //Apply Sort
-            invDto = Sort(input.PagedResultDto.Sort, input.PagedResultDto.SortOrder, invDto);
-
-            // Apply search
-            if (!string.IsNullOrEmpty(input.PagedResultDto.Search))
+            if (input.PagedResultDto != null)
             {
-                invDto = invDto.Where(p => p.Status != null && p.Status.ToLower().ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.Name != null && p.Name.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.Description != null && p.Name.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.CostPrice != null && p.CostPrice.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.SellingPrice != null && p.CostPrice.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.Quantity != null && p.Quantity.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.DateCreated != null && p.DateCreated.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.Name != null && p.Name.ToString().ToLower().ToString().Contains(input.PagedResultDto.Search.ToLower())
-                ).ToList();
+                //Apply Sort
+                invDto = Sort(input.PagedResultDto.Sort, input.PagedResultDto.SortOrder, invDto);
 
+                // Apply search
+                if (!string.IsNullOrEmpty(input.PagedResultDto.Search))
+                {
+                    invDto = invDto.Where(p => p.Status != null && p.Status.ToLower().ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.Name != null && p.Name.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.Description != null && p.Name.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.CostPrice != null && p.CostPrice.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.SellingPrice != null && p.CostPrice.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.Quantity != null && p.Quantity.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.DateCreated != null && p.DateCreated.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.Name != null && p.Name.ToString().ToLower().ToString().Contains(input.PagedResultDto.Search.ToLower())
+                    ).ToList();
+
+                }
             }
             return invDto;
 

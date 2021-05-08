@@ -19,12 +19,49 @@ namespace BustleApp_api.Repositories
 
         }
 
+        public CartDto GetCartDetails(int id)
+        {
+            try
+            {
+                var query = (from cart in _context.Cart.ToList().Where(o => o.Id == id)
+                             join inventory in _context.Inventory.ToList()
+                                 on cart.InventoryId equals inventory.Id
+
+                             join user in _context.UserProfile.ToList()
+                            on cart.UserProfileId equals user.Id
+                             select new CartDto
+                             {
+                                 Description = cart.Description,
+                                 Id = cart.Id,
+                                 Price = Formatters.FormatAmount(cart.Price),
+                                 Quantity = cart.Quantity,
+                                 InventoryId = cart.InventoryId,
+                                 InventoryName = inventory.Description,
+                                 DateCreated = cart.DateCreated.ToString("dddd, dd MMMM yyyy"),
+                                 Status = cart.Status,
+                                 UserId = cart.UserId,
+                                 Fullname = string.Format("{0} {1}", user.FirstName, user.LastName)
+
+
+                             }).ToList().FirstOrDefault();
+
+                return query;
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return null;
+        }
+
         public async Task<CartDto> GetCartForView(int Id)
         {
-            var tags = await _context.Cart.Where(x => x.Id == Id).FirstOrDefaultAsync();
-            if (tags != null)
+            var rec = await _context.Cart.Where(x => x.Id == Id).FirstOrDefaultAsync();
+            if (rec != null)
             {
-                return MappingProfile.MappingConfigurationSetups().Map<CartDto>(tags);
+                var records = GetCartDetails(Id);
+
+                return MappingProfile.MappingConfigurationSetups().Map<CartDto>(records);
             }
             return new CartDto();
         }
@@ -34,11 +71,23 @@ namespace BustleApp_api.Repositories
             var users = await _context.Cart.Where(x => x.Id == input.Id).FirstOrDefaultAsync();
             if (users != null)
             {
-                Cart tagDto = MappingProfile.MappingConfigurationSetups().Map<Cart>(input);
-                _context.Cart.Update(tagDto);
+                decimal price = 0.0m;
+                Cart cart = new Cart
+                {
+                    Description = input.Description,
+                    InventoryId = input.InventoryId,
+                    UserProfileId = input.UserProfileId,
+                    Id = (int)input.Id,
+                    UserId = input.UserId,
+                    Price = decimal.TryParse(input.Price, out price) ? price : 0.00m,
+                    Quantity = input.Quantity,
+                    Status = input.Status
+                };
+
+                _context.Cart.Update(cart);
                 await _context.SaveChangesAsync();
 
-                return MappingProfile.MappingConfigurationSetups().Map<CartDto>(tagDto);
+                return MappingProfile.MappingConfigurationSetups().Map<CartDto>(cart);
             }
             return new CartDto();
         }
@@ -71,19 +120,33 @@ namespace BustleApp_api.Repositories
 
         protected virtual async Task Create(CartDto input)
         {
-            Cart tagDto = MappingProfile.MappingConfigurationSetups().Map<Cart>(input);
-            _context.Cart.Add(tagDto);
+            Cart cart = MappingProfile.MappingConfigurationSetups().Map<Cart>(input);
+            cart.DateCreated = DateTime.Now;
+            cart.Status = "Active";
+            _context.Cart.Add(cart);
             await _context.SaveChangesAsync();
 
         }
 
         protected virtual async Task Update(CartDto input)
         {
-            var tags = await _context.Cart.Where(x => x.Id == input.Id).FirstOrDefaultAsync();
-            if (tags != null)
+            var cartRec = await _context.Cart.Where(x => x.Id == input.Id).FirstOrDefaultAsync();
+            if (cartRec != null)
             {
-                Cart tagDto = MappingProfile.MappingConfigurationSetups().Map<Cart>(input);
-                _context.Cart.Update(tagDto);
+                decimal price = 0.0m;
+                Cart cart = new Cart
+                {
+                    Description = input.Description,
+                    InventoryId = input.InventoryId,
+                    UserProfileId = input.UserProfileId,
+                    Id = (int)input.Id,
+                    UserId = input.UserId,
+                    Price = decimal.TryParse(input.Price, out price) ? price : 0.00m,
+                    Quantity = input.Quantity,
+                    Status = input.Status
+                };
+                cartRec = cart;
+                _context.Cart.Update(cartRec);
                 await _context.SaveChangesAsync();
             }
 
@@ -111,27 +174,30 @@ namespace BustleApp_api.Repositories
                              Fullname = string.Format("{0} {1}", user.FirstName, user.LastName)
 
 
-                         }).ToList().Skip((input.PagedResultDto.Page - 1) * input.PagedResultDto.SkipCount).Take(input.PagedResultDto.MaxResultCount);
+                         }).ToList();
 
             // Map Records
             List<CartDto> invDto = MappingProfile.MappingConfigurationSetups().Map<List<CartDto>>(query);
 
-            //Apply Sort
-            invDto = Sort(input.PagedResultDto.Sort, input.PagedResultDto.SortOrder, invDto);
-
-            // Apply search
-            if (!string.IsNullOrEmpty(input.PagedResultDto.Search))
+            if (input.PagedResultDto != null)
             {
-                invDto = invDto.Where(p => p.Status != null && p.Status.ToLower().ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.Description != null && p.Description.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.Price != null && p.Price.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.Quantity != null && p.Quantity.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.Fullname != null && p.Fullname.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.Quantity != null && p.Quantity.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.DateCreated != null && p.DateCreated.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.InventoryName != null && p.InventoryName.ToString().ToLower().ToString().Contains(input.PagedResultDto.Search.ToLower())
-                ).ToList();
+                //Apply Sort
+                invDto = Sort(input.PagedResultDto.Sort, input.PagedResultDto.SortOrder, invDto);
 
+                // Apply search
+                if (!string.IsNullOrEmpty(input.PagedResultDto.Search))
+                {
+                    invDto = invDto.Where(p => p.Status != null && p.Status.ToLower().ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.Description != null && p.Description.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.Price != null && p.Price.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.Quantity != null && p.Quantity.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.Fullname != null && p.Fullname.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.Quantity != null && p.Quantity.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.DateCreated != null && p.DateCreated.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.InventoryName != null && p.InventoryName.ToString().ToLower().ToString().Contains(input.PagedResultDto.Search.ToLower())
+                    ).ToList();
+
+                }
             }
             return invDto;
 

@@ -40,13 +40,20 @@ namespace BustleApp_api.Repository.Repositories
             var users = await _context.UserProfile.Where(x => x.Id == input.Id).FirstOrDefaultAsync();
             if (users != null)
             {
-                UserProfile userDto = MappingProfile.MappingConfigurationSetups().Map<UserProfile>(input);
-                _context.UserProfile.Update(users);
+                UserProfile user = new UserProfile
+                {
+                    EmailAddress = input.EmailAddress,
+                    FirstName = input.FirstName,
+                    LastName = input.LastName,
+                    MiddleName = input.MiddleName,
+                    PhoneNumber = input.PhoneNumber,
+                };
+
+                _context.UserProfile.Update(user);
                 await _context.SaveChangesAsync();
-                return MappingProfile.MappingConfigurationSetups().Map<UserProfileDto>(userDto);
+                return MappingProfile.MappingConfigurationSetups().Map<UserProfileDto>(user);
             }
             return new UserProfileDto();
-
 
         }
 
@@ -94,8 +101,16 @@ namespace BustleApp_api.Repository.Repositories
             var users = await _context.UserProfile.Where(x => x.Id == input.Id).FirstOrDefaultAsync();
             if (users != null)
             {
-                UserProfile userDto = MappingProfile.MappingConfigurationSetups().Map<UserProfile>(input);
-                _context.UserProfile.Update(userDto);
+                UserProfile user = new UserProfile
+                {
+                    EmailAddress = input.EmailAddress,
+                    FirstName = input.FirstName,
+                    LastName = input.LastName,
+                    MiddleName = input.MiddleName,
+                    PhoneNumber = input.PhoneNumber,
+                };
+
+                _context.UserProfile.Update(users);
                 await _context.SaveChangesAsync();
             }
 
@@ -104,27 +119,27 @@ namespace BustleApp_api.Repository.Repositories
 
         public List<UserProfileDto> GetAllUsers(UserProfileDto input)
         {
-            
+
             var allUsers = (from user in _context.UserProfile.ToList()
-                        
-                         select new UserProfileDto
-                         {
-                             UserName = user.UserName,
-                             Password = user.Password,
-                             EmailAddress = user.EmailAddress,
-                             Id = user.Id,
-                             DateCreated = user.DateCreated,
-                             LastName = user.LastName,
-                             FirstName = user.FirstName,
-                             MiddleName = user.MiddleName,
-                             
-                         }).ToList();
+
+                            select new UserProfileDto
+                            {
+                                UserName = user.UserName,
+                                Password = user.Password,
+                                EmailAddress = user.EmailAddress,
+                                Id = user.Id,
+                                DateCreated = user.DateCreated,
+                                LastName = user.LastName,
+                                FirstName = user.FirstName,
+                                MiddleName = user.MiddleName,
+
+                            }).ToList();
 
             // Map Records
             List<UserProfileDto> userDto = MappingProfile.MappingConfigurationSetups().Map<List<UserProfileDto>>(allUsers);
 
             //Apply Sort
-            if(input.PagedResultDto != null)
+            if (input.PagedResultDto != null)
             {
                 userDto = Sort(input.PagedResultDto.Sort, input.PagedResultDto.SortOrder, userDto);
 
@@ -141,9 +156,7 @@ namespace BustleApp_api.Repository.Repositories
 
                 }
             }
-            
 
-            
             return userDto;
 
         }
@@ -273,7 +286,7 @@ namespace BustleApp_api.Repository.Repositories
                         returnProp.ResponseText = string.Format("Enforce Password Change");
                         return returnProp;
                     }
-                   
+
                     returnProp.ResponseCode = 0;
                     returnProp.ResponseText = "Login Successful";
                     returnProp.EnforcePassChange = 0;

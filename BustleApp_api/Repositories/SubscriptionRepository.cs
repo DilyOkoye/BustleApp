@@ -33,11 +33,21 @@ namespace BustleApp_api.Repository.Repositories
             var users = await _context.Subscription.Where(x => x.Id == input.Id).FirstOrDefaultAsync();
             if (users != null)
             {
-                Subscription tagDto = MappingProfile.MappingConfigurationSetups().Map<Subscription>(input);
-                _context.Subscription.Update(tagDto);
+                Subscription sub = new Subscription
+                {
+                    Description = input.Description,
+                    EndDate = input.EndDate,
+                    DateCreated = input.DateCreated,
+                    Id = (int)input.Id,
+                    Name = input.Name,
+                    StartDate = input.StartDate,
+                    Status = input.Status,
+                };
+
+                _context.Subscription.Update(sub);
                 await _context.SaveChangesAsync();
 
-                return MappingProfile.MappingConfigurationSetups().Map<SubscriptionDto>(tagDto);
+                return MappingProfile.MappingConfigurationSetups().Map<SubscriptionDto>(sub);
             }
             return new SubscriptionDto();
         }
@@ -81,8 +91,17 @@ namespace BustleApp_api.Repository.Repositories
             var tags = await _context.Subscription.Where(x => x.Id == input.Id).FirstOrDefaultAsync();
             if (tags != null)
             {
-                Subscription tagDto = MappingProfile.MappingConfigurationSetups().Map<Subscription>(input);
-                _context.Subscription.Update(tagDto);
+                Subscription sub = new Subscription
+                {
+                    Description = input.Description,
+                    EndDate = input.EndDate,
+                    DateCreated = input.DateCreated,
+                    Id = (int)input.Id,
+                    Name = input.Name,
+                    StartDate = input.StartDate,
+                    Status = input.Status,
+                };
+                _context.Subscription.Update(sub);
                 await _context.SaveChangesAsync();
             }
 
@@ -103,23 +122,26 @@ namespace BustleApp_api.Repository.Repositories
                              Status = subscription.Status,
                              UserId = subscription.UserId
 
-                         }).ToList().Skip((input.PagedResultDto.Page - 1) * input.PagedResultDto.SkipCount).Take(input.PagedResultDto.MaxResultCount);
+                         }).ToList();
 
             // Map Records
             List<SubscriptionDto> ratingDto = MappingProfile.MappingConfigurationSetups().Map<List<SubscriptionDto>>(query);
 
-            //Apply Sort
-            ratingDto = Sort(input.PagedResultDto.Sort, input.PagedResultDto.SortOrder, ratingDto);
-
-            // Apply search
-            if (!string.IsNullOrEmpty(input.PagedResultDto.Search))
+            if (input.PagedResultDto != null)
             {
-                ratingDto = ratingDto.Where(p => p.Status != null && p.Status.ToLower().ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.Username != null && p.Username.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.DateCreated != null && p.DateCreated.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                || p.Name != null && p.Name.ToString().ToLower().ToString().Contains(input.PagedResultDto.Search.ToLower())
-                ).ToList();
+                //Apply Sort
+                ratingDto = Sort(input.PagedResultDto.Sort, input.PagedResultDto.SortOrder, ratingDto);
 
+                // Apply search
+                if (!string.IsNullOrEmpty(input.PagedResultDto.Search))
+                {
+                    ratingDto = ratingDto.Where(p => p.Status != null && p.Status.ToLower().ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.Username != null && p.Username.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.DateCreated != null && p.DateCreated.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    || p.Name != null && p.Name.ToString().ToLower().ToString().Contains(input.PagedResultDto.Search.ToLower())
+                    ).ToList();
+
+                }
             }
             return ratingDto;
 
