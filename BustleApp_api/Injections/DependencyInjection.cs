@@ -7,6 +7,7 @@ using BustleApp_api.InventoryAggregate;
 using BustleApp_api.Repositories;
 using BustleApp_api.Repository.Implementations;
 using BustleApp_api.Repository.Repositories;
+using BustleApp_api.ShoppingListAggregate;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BustleApp_api.Repository.Injections
@@ -15,6 +16,7 @@ namespace BustleApp_api.Repository.Injections
     {
         public static IServiceCollection AddRepository(this IServiceCollection services)
         {
+            services.AddTransient<IShoppingListRepository, ShoppingListRepository>();
             services.AddTransient<IUserProfileRepository, UserProfileRepository>();
             services.AddTransient<ISubscriptionRepository, SubscriptionRepository>();
             services.AddTransient<IInventoryRepository, InventoryRepository>();

@@ -32,7 +32,6 @@
     <Folder Include="Implementations\" />
     <Folder Include="Injections\" />
     <Folder Include="MappingConfigurations\" />
-    <Folder Include="Repositories\" />
     <Folder Include="InventoryAggregate\" />
     <Folder Include="InventoryAggregate\Dtos\" />
     <Folder Include="CartAggregate\" />

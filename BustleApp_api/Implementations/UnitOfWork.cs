@@ -6,12 +6,14 @@ using BustleApp_api.Domain.UserProfileAggregate;
 using BustleApp_api.InventoryAggregate;
 using BustleApp_api.Repositories;
 using BustleApp_api.Repository.DatabaseContext;
+using BustleApp_api.ShoppingListAggregate;
 
 namespace BustleApp_api.Repository.Implementations
 {
     public class UnitOfWork : IUnitOfWork
     {
         private readonly BustleContext _context;
+        public IShoppingListRepository ShoppingLists { get; }
         public IUserProfileRepository UserProfiles { get; }
         public ISubscriptionRepository Subscriptions { get; }
         public IInventoryRepository Inventories { get; }
@@ -21,7 +23,8 @@ namespace BustleApp_api.Repository.Implementations
              IUserProfileRepository userProfileRepository,
              ISubscriptionRepository subscriptionRepository,
              IInventoryRepository InventoryRepository,
-             ICartRepository cartRepository
+             ICartRepository cartRepository,
+             IShoppingListRepository shoppingRepository
           )
         {
             this._context = bustleContext;
@@ -29,6 +32,7 @@ namespace BustleApp_api.Repository.Implementations
             this.Subscriptions = subscriptionRepository;
             this.Inventories = InventoryRepository;
             this.Carts = cartRepository;
+            this.ShoppingLists = shoppingRepository;
 
 
         }
