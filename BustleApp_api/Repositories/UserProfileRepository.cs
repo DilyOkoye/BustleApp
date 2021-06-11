@@ -42,7 +42,7 @@ namespace BustleApp_api.Repository.Repositories
             {
                 UserProfile user = new UserProfile
                 {
-                    userEmail = input.EmailAddress,
+                    userEmail = input.userEmail,
                     FirstName = input.FirstName,
                     LastName = input.LastName,
                     MiddleName = input.MiddleName,
@@ -88,11 +88,16 @@ namespace BustleApp_api.Repository.Repositories
         protected virtual async Task<LoginResponseDto> Create(UserProfileDto input)
         {
             var rtv = new LoginResponseDto();
-            UserProfile userDto = MappingProfile.MappingConfigurationSetups().Map<UserProfile>(input);
-            input.Password = Cryptors.GetSHAHashData(input.Password);
+            input.userPassword = Cryptors.GetSHAHashData(input.userPassword);
             input.IsLockoutEnabled = 0;
+            input.DateCreated = DateTime.Now;
+            input.userEmail = input.userEmail;
             input.ShouldChangePasswordOnNextLogin = 1;
             input.AccessFailedCount = 0;
+            input.businessName = input.businessName;
+            input.Country = input.Country;
+            UserProfile userDto = MappingProfile.MappingConfigurationSetups().Map<UserProfile>(input);
+            
             _context.UserProfile.Add(userDto);
            int res = await _context.SaveChangesAsync();
             if (res > 0)
@@ -120,7 +125,7 @@ namespace BustleApp_api.Repository.Repositories
             {
                 UserProfile user = new UserProfile
                 {
-                    userEmail = input.EmailAddress,
+                    userEmail = input.userEmail,
                     FirstName = input.FirstName,
                     LastName = input.LastName,
                     MiddleName = input.MiddleName,
@@ -152,9 +157,8 @@ namespace BustleApp_api.Repository.Repositories
 
                             select new UserProfileDto
                             {
-                                UserName = user.UserName,
-                                Password = user.userPassword,
-                                EmailAddress = user.userEmail,
+                                userPassword = user.userPassword,
+                                userEmail = user.userEmail,
                                 Id = user.Id,
                                 DateCreated = user.DateCreated,
                                 LastName = user.LastName,
@@ -174,8 +178,7 @@ namespace BustleApp_api.Repository.Repositories
                 // Apply search
                 if (!string.IsNullOrEmpty(input.PagedResultDto.Search))
                 {
-                    userDto = userDto.Where(p => p.UserName != null && p.UserName.ToLower().ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
-                    || p.EmailAddress != null && p.EmailAddress.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
+                    userDto = userDto.Where(p =>  p.userEmail != null && p.userEmail.ToString().ToLower().Contains(input.PagedResultDto.Search.ToLower())
                     || p.FirstName != null && p.FirstName.ToLower().Contains(input.PagedResultDto.Search.ToLower())
                     || p.LastName != null && p.LastName.ToLower().ToString().Contains(input.PagedResultDto.Search.ToLower())
                     || p.MiddleName != null && p.MiddleName.ToLower().Contains(input.PagedResultDto.Search.ToLower())
@@ -203,14 +206,14 @@ namespace BustleApp_api.Repository.Repositories
                 {
                     case "0":
                         // Setting.
-                        lst = orderDir.Equals("DESC", StringComparison.CurrentCultureIgnoreCase) ? data.OrderByDescending(p => p.UserName).ToList()
-                                                                                                 : data.OrderBy(p => p.UserName).ToList();
+                        lst = orderDir.Equals("DESC", StringComparison.CurrentCultureIgnoreCase) ? data.OrderByDescending(p => p.PhoneNumber).ToList()
+                                                                                                 : data.OrderBy(p => p.PhoneNumber).ToList();
                         break;
 
                     case "1":
                         // Setting.
-                        lst = orderDir.Equals("DESC", StringComparison.CurrentCultureIgnoreCase) ? data.OrderByDescending(p => p.EmailAddress).ToList()
-                                                                                                 : data.OrderBy(p => p.EmailAddress).ToList();
+                        lst = orderDir.Equals("DESC", StringComparison.CurrentCultureIgnoreCase) ? data.OrderByDescending(p => p.userEmail).ToList()
+                                                                                                 : data.OrderBy(p => p.userEmail).ToList();
                         break;
 
                     case "2":
@@ -236,8 +239,8 @@ namespace BustleApp_api.Repository.Repositories
                     default:
 
                         // Setting.
-                        lst = orderDir.Equals("DESC", StringComparison.CurrentCultureIgnoreCase) ? data.OrderByDescending(p => p.UserName).ToList()
-                                                                                                 : data.OrderBy(p => p.UserName).ToList();
+                        lst = orderDir.Equals("DESC", StringComparison.CurrentCultureIgnoreCase) ? data.OrderByDescending(p => p.userEmail).ToList()
+                                                                                                 : data.OrderBy(p => p.userEmail).ToList();
                         break;
                 }
             }
@@ -303,7 +306,7 @@ namespace BustleApp_api.Repository.Repositories
 
 
                 string compare = Cryptors.GetSHAHashData(input.userPassword);
-                var com = await _context.UserProfile.Where(i => i.userPassword.Trim() == compare.Trim() && i.UserName.Trim().ToUpper() == input.userEmail.Trim().ToUpper()).FirstOrDefaultAsync();
+                var com = await _context.UserProfile.Where(i => i.userPassword.Trim() == compare.Trim() && i.userEmail.Trim().ToUpper() == input.userEmail.Trim().ToUpper()).FirstOrDefaultAsync();
                 if (com != null)
                 {
 
@@ -311,7 +314,7 @@ namespace BustleApp_api.Repository.Repositories
                     {
 
                         returnProp.ResponseCode = 2;
-                        returnProp.ResponseText = string.Format("Enforce Password Change");
+                        returnProp.ResponseText = string.Format("Enforce userPassword Change");
                         return returnProp;
                     }
 
@@ -355,7 +358,7 @@ namespace BustleApp_api.Repository.Repositories
                         await _context.SaveChangesAsync();
 
                         returnProp.ResponseCode = 3;
-                        returnProp.ResponseText = "Invalid Login Id/Password.Enter Password (" + userProfile.AccessFailedCount + "/" + Convert.ToInt32(config.Value.LoginCount) + ")";
+                        returnProp.ResponseText = "Invalid Login Id/userPassword.Enter userPassword (" + userProfile.AccessFailedCount + "/" + Convert.ToInt32(config.Value.LoginCount) + ")";
                         return returnProp;
                     }
                 }

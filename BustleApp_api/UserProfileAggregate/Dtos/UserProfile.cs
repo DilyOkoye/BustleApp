@@ -23,6 +23,5 @@ namespace BustleApp_api.Domain.UserProfileAggregate.Dtos
         public string userPassword   { get; set; }
         public string PhoneNumber { get; set; }
         public int? ShouldChangePasswordOnNextLogin { get; set; }
-        public string UserName { get; set; }
     }   
 }

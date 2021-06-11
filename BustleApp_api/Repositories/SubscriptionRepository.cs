@@ -115,7 +115,7 @@ namespace BustleApp_api.Repository.Repositories
                               on subscription.UserProfileId equals user.Id
                          select new SubscriptionDto
                          {
-                             Username = user.UserName,
+                             Username = user.userEmail,
                              Name = subscription.Name,
                              Id = subscription.Id,
                              DateCreated = subscription.DateCreated,
