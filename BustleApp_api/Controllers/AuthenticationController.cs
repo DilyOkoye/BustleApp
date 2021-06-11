@@ -32,9 +32,9 @@ namespace BustleApp_api.Controllers
 
         [HttpPost]
         [Route("CreateOrEditUsers")]
-        public async Task CreateOrEditUsers(UserProfileDto input)
+        public async Task<LoginResponseDto> CreateOrEditUsers(UserProfileDto input)
         {
-            await _unitOfWork.UserProfiles.CreateOrEditUsers(input);
+          return  await _unitOfWork.UserProfiles.CreateOrEditUsers(input);
         }
 
         [HttpGet]
@@ -58,7 +58,7 @@ namespace BustleApp_api.Controllers
             return _unitOfWork.UserProfiles.GetAllUsers(input);
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("AutheticateUser")]
         public async Task<LoginResponseDto> AutheticateUser(LoginRequestDto input)
         {

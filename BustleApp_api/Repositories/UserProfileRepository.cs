@@ -42,7 +42,7 @@ namespace BustleApp_api.Repository.Repositories
             {
                 UserProfile user = new UserProfile
                 {
-                    EmailAddress = input.EmailAddress,
+                    userEmail = input.EmailAddress,
                     FirstName = input.FirstName,
                     LastName = input.LastName,
                     MiddleName = input.MiddleName,
@@ -71,39 +71,56 @@ namespace BustleApp_api.Repository.Repositories
         }
 
 
-        public async Task CreateOrEditUsers(UserProfileDto input)
+        public async Task<LoginResponseDto> CreateOrEditUsers(UserProfileDto input)
         {
+            
             if (input.Id == null || input.Id == 0)
             {
-                await Create(input);
+              return  await Create(input);
             }
             else
             {
-                await Update(input);
+                return await Update(input);
             }
 
         }
 
-        protected virtual async Task Create(UserProfileDto input)
+        protected virtual async Task<LoginResponseDto> Create(UserProfileDto input)
         {
+            var rtv = new LoginResponseDto();
             UserProfile userDto = MappingProfile.MappingConfigurationSetups().Map<UserProfile>(input);
             input.Password = Cryptors.GetSHAHashData(input.Password);
             input.IsLockoutEnabled = 0;
             input.ShouldChangePasswordOnNextLogin = 1;
             input.AccessFailedCount = 0;
             _context.UserProfile.Add(userDto);
-            await _context.SaveChangesAsync();
+           int res = await _context.SaveChangesAsync();
+            if (res > 0)
+            {
+                rtv.ResponseCode = 0;
+                rtv.ResponseText = "Successfull";
+                return rtv;
+            }
+            else 
+            {
+                rtv.ResponseCode = -2;
+                rtv.ResponseText = "Failed";
+                return rtv;
+
+            }
+
 
         }
 
-        protected virtual async Task Update(UserProfileDto input)
+        protected virtual async Task<LoginResponseDto> Update(UserProfileDto input)
         {
+            var rtv = new LoginResponseDto();
             var users = await _context.UserProfile.Where(x => x.Id == input.Id).FirstOrDefaultAsync();
             if (users != null)
             {
                 UserProfile user = new UserProfile
                 {
-                    EmailAddress = input.EmailAddress,
+                    userEmail = input.EmailAddress,
                     FirstName = input.FirstName,
                     LastName = input.LastName,
                     MiddleName = input.MiddleName,
@@ -111,8 +128,19 @@ namespace BustleApp_api.Repository.Repositories
                 };
 
                 _context.UserProfile.Update(users);
-                await _context.SaveChangesAsync();
+                int res = await _context.SaveChangesAsync();
+
+                if (res > 0)
+                {
+                    rtv.ResponseCode = 0;
+                    rtv.ResponseText = "Successfull";
+                    return rtv;
+                }
+                
             }
+            rtv.ResponseCode = -2;
+            rtv.ResponseText = "Failed";
+            return rtv;
 
         }
 
@@ -125,8 +153,8 @@ namespace BustleApp_api.Repository.Repositories
                             select new UserProfileDto
                             {
                                 UserName = user.UserName,
-                                Password = user.Password,
-                                EmailAddress = user.EmailAddress,
+                                Password = user.userPassword,
+                                EmailAddress = user.userEmail,
                                 Id = user.Id,
                                 DateCreated = user.DateCreated,
                                 LastName = user.LastName,
@@ -234,7 +262,7 @@ namespace BustleApp_api.Repository.Repositories
             {
                 try
                 {
-                    userProfile = await _context.UserProfile.Where(p => p.UserName.ToUpper().Equals(input.Username.ToUpper().Trim())).FirstOrDefaultAsync();
+                    userProfile = await _context.UserProfile.Where(p => p.userEmail.ToUpper().Equals(input.userEmail.ToUpper().Trim())).FirstOrDefaultAsync();
                 }
                 catch (Exception ex)
                 {
@@ -274,8 +302,8 @@ namespace BustleApp_api.Repository.Repositories
                 }
 
 
-                string compare = Cryptors.GetSHAHashData(input.Password);
-                var com = await _context.UserProfile.Where(i => i.Password.Trim() == compare.Trim() && i.UserName.Trim().ToUpper() == input.Username.Trim().ToUpper()).FirstOrDefaultAsync();
+                string compare = Cryptors.GetSHAHashData(input.userPassword);
+                var com = await _context.UserProfile.Where(i => i.userPassword.Trim() == compare.Trim() && i.UserName.Trim().ToUpper() == input.userEmail.Trim().ToUpper()).FirstOrDefaultAsync();
                 if (com != null)
                 {
 
@@ -293,6 +321,12 @@ namespace BustleApp_api.Repository.Repositories
                     returnProp.RoleId = userProfile.RoleId;
                     returnProp.FullName = string.Format("{0} {1}", userProfile.FirstName, userProfile.LastName);
                     returnProp.UserId = userProfile.Id;
+
+                    var subscription = await _context.Subscription.Where(p => p.UserId == userProfile.UserId).FirstOrDefaultAsync();
+                    if (subscription != null)
+                        returnProp.Status = subscription.Status;
+                    else
+                        returnProp.Status = "InActive";
 
                     userProfile.IsLockoutEnabled = 0;
                     userProfile.AccessFailedCount = 0;
